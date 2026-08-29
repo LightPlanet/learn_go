@@ -25,7 +25,7 @@ func InputNumber(reader *bufio.Reader, out *uint) bool {
 	return true
 }
 
-// Сортирует последовательность vals, соответственно предикату pred
+// Сортирует последовательность vals соответственно предикату pred
 func Sort(vals []uint, pred func(uint, uint) bool) {
 	var lhs *uint
 	var rhs *uint
@@ -42,7 +42,7 @@ func Sort(vals []uint, pred func(uint, uint) bool) {
 
 func MinMax(vals []uint) (uint, uint, error) {
 	if len(vals) == 0 {
-		return 0, 0, fmt.Errorf("Can't find minmax for an empty range")
+		return 0, 0, fmt.Errorf("empty range")
 	}
 	min := vals[0]
 	for i := 1; i < len(vals); i++ {
@@ -61,7 +61,7 @@ func MinMax(vals []uint) (uint, uint, error) {
 
 func Accumulate(vals []uint) (uint, error) {
 	if len(vals) == 0 {
-		return 0, fmt.Errorf("Can't accumulate an empty range")
+		return 0, fmt.Errorf("empty range")
 	}
 	var ret uint // Default-initialized as 0
 	for _, v := range vals {
