@@ -16,7 +16,7 @@ import (
 
 func InputNumber(reader *bufio.Reader, out *uint) bool {
 	fmt.Print("Enter the number: ")
-	_, err := fmt.Scan(out)
+	_, err := fmt.Fscan(reader, out)
 	if err != nil {
 		fmt.Println(err)
 		_, _ = reader.ReadString('\n')
