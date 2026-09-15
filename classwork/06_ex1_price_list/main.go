@@ -53,6 +53,10 @@ func extractEntry(s string, out_entry *Entry) bool {
 		fmt.Println(err)
 		return false
 	}
+	if out_entry.Price == 0 {
+		fmt.Println("В этом магазине нет бесплатных товаров!")
+		return false
+	}
 
 	// Extract count
 	out_entry.Count, err = strconv.ParseUint(tokens[2], 10, 64)
@@ -63,7 +67,7 @@ func extractEntry(s string, out_entry *Entry) bool {
 	return true
 }
 
-func printCheck(es *[3]Entry, has_card bool, before_discount, after_discount uint64) {
+func printPriceList(es *[3]Entry, has_card bool, before_discount, after_discount uint64) {
 	get_discount := func() uint64 { // printf helper
 		if has_card {
 			return 5
@@ -71,7 +75,7 @@ func printCheck(es *[3]Entry, has_card bool, before_discount, after_discount uin
 		return 0
 	}
 	fmt.Printf(
-		`======================================
+		`=======================================
               ОАО Golang
 =======================================
 %s
@@ -79,13 +83,13 @@ func printCheck(es *[3]Entry, has_card bool, before_discount, after_discount uin
 %s
 
 %s
-----------------------------------------
+---------------------------------------
 Итого без скидки: %d
 Скидка: %d%%
 Итог: %d
------------------------------------------
+---------------------------------------
           Спасибо за покупку!
------------------------------------------
+---------------------------------------
 `,
 		es[0], es[1], es[2],
 		before_discount,
@@ -123,5 +127,5 @@ func main() {
 	}
 
 	// Print result
-	printCheck(&entries, has_card, before_discount, after_discount)
+	printPriceList(&entries, has_card, before_discount, after_discount)
 }
