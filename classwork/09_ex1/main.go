@@ -2,6 +2,16 @@ package main
 
 import "fmt"
 
+// Amimal
+
+type Animal interface {
+	Speak() string
+}
+
+func SaySomething(this Animal) string {
+	return this.Speak()
+}
+
 // Cat
 
 type Cat struct {
@@ -33,5 +43,5 @@ func main() {
 		Name:  "Кусака",
 		Voice: "Гав! Гав! Гав!",
 	}
-	fmt.Println(cat.Speak(), dog.Speak())
+	fmt.Println(SaySomething(cat), SaySomething(dog))
 }
