@@ -9,7 +9,7 @@ struct defer {
 };
 
 // Go: local variable is copied (returns: "Казалось бы")
-// C++: Undefined behaviour (without NRVO: "Казалось бы", with NRVO: "На самом деле")
+// C++: undefined behaviour (without NRVO: "Казалось бы", with NRVO: "На самом деле")
 std::string f1() {
     std::string value{ "Казалось бы" };
     defer d{value};
@@ -17,8 +17,8 @@ std::string f1() {
 }
 
 // Go-like named return behaviour (returns: "На самом деле")
+// Reference counter is used to emulate automatic memory management
 std::shared_ptr<std::string> f2() {
-    // Using reference counter to emulate automatic memory management
     auto value = std::make_shared<std::string>("Казалось бы");
     defer d{*value};
     return value;
