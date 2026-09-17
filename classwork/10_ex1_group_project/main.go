@@ -34,13 +34,62 @@ func (this Book) Print(rowFormat string) {
 	fmt.Printf(rowFormat, this.ID, this.Author, this.Title, this.Avail)
 }
 
+// Program state (see main.userWants variable)
+const (
+	UserWantsHelp = iota // default
+	UserWantsNotAvailBooks
+	UserWantsGetBook
+	UserWantsConcreteAuthor
+)
+
+func PrintCurrentMode(userWants int) {
+	fmt.Print("Текущий режим: ")
+	switch userWants {
+	case UserWantsHelp:
+		fmt.Println("Помощь")
+	case UserWantsNotAvailBooks:
+		fmt.Println("Не доступные книги")
+	case UserWantsGetBook:
+		fmt.Println("Запрос книги")
+	case UserWantsConcreteAuthor:
+		fmt.Println("Поиск по автору")
+	}
+}
+
 func PrintHelp() {
-
+	fmt.Println("0 - Помощь (этот список)")
+	fmt.Println("1 - Все книги, которые были взяты")
+	fmt.Println("2 - Взять книгу по индексу")
+	fmt.Println("3 - Книги автора")
 }
 
-func FindBook(books []Book, s string) {
-
-}
+//func FindBookInUse(books []Book) {
+//	for _, v := range books {
+//		if v.InUse == true {
+//			fmt.Println(v.ID, v.Author, v.Title, v.InUse)
+//		}
+//	}
+//}
+//
+//func FindBookByIndex(books []Book, index string) {
+//	for _, v := range books {
+//		if v.InUse == true {
+//			continue
+//		}
+//		if v.ID == index {
+//			v.InUse = true
+//			fmt.Println(v.ID, v.Author, v.Title, v.InUse)
+//		}
+//	}
+//}
+//
+//func FindBook(books []Book, s string) {
+//	for _, v := range books {
+//		if v.Author == s {
+//			fmt.Println(v.ID, v.Author, v.Title, v.InUse)
+//		}
+//	}
+//}
 
 func calcWidth(books []Book, getString func(Book) string) (ret int) {
 	for _, b := range books {
@@ -73,13 +122,7 @@ func main() {
 	}()
 
 	// State machine
-	const (
-		Help = iota // default
-		NotAvailBooks
-		GetBook
-		BooksOfAuthor
-	)
-	userWants := Help
+	userWants := UserWantsHelp
 
 	// Main loop
 	var userInput string
@@ -88,38 +131,42 @@ func main() {
 		// Start new frame - clear Terminal buffer
 		fmt.Print("\033[H\033[2J")
 
-		// Print current state and help
-		fmt.Printf(tableRowFormat, "ID", "Author", "Title", "Avail")
+		PrintCurrentMode(userWants)
+		fmt.Println()
+
+		// Print book list
+		fmt.Printf(tableRowFormat, "ID", "Автор", "Название", "Доступно")
 		for _, b := range books {
 			switch userWants {
-			case NotAvailBooks:
+			case UserWantsNotAvailBooks:
 				if b.Avail {
 					continue
 				}
-			case BooksOfAuthor:
+			case UserWantsConcreteAuthor:
 				if !strings.Contains(b.Author, userInput) {
 					continue
 				}
 			}
 			b.Print(tableRowFormat)
 		}
-		if userWants == Help {
-			fmt.Println("Available commands:")
+		if userWants == UserWantsHelp {
+			fmt.Println("\nДоступные команды:")
 			PrintHelp()
 		}
 
 		// User input
+		fmt.Print("\nВведите запрос: ")
 		if scanner.Scan() {
 			userInput := scanner.Text()
 			switch userInput {
 			case "0":
-				userWants = Help
+				userWants = UserWantsHelp
 			case "1":
-				userWants = NotAvailBooks
+				userWants = UserWantsNotAvailBooks
 			case "2":
-				userWants = GetBook
+				userWants = UserWantsGetBook
 			case "3":
-				userWants = BooksOfAuthor
+				userWants = UserWantsConcreteAuthor
 			}
 		}
 	}
