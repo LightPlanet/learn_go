@@ -61,6 +61,7 @@ func PrintHelp() {
 	fmt.Println("1 - Все книги, которые были взяты")
 	fmt.Println("2 - Взять книгу по индексу")
 	fmt.Println("3 - Книги автора")
+	fmt.Println("4 - Закрыть программу")
 }
 
 //	func FindBookInUse(books []Book) {
@@ -80,12 +81,13 @@ func PrintHelp() {
 //}
 
 func FindAndGetAvailBookByID(books []Book, id string) {
-	for _, v := range books {
-		if !v.Avail == true {
+	for i := 0; i < len(books); i++ {
+		b := &books[i]
+		if !b.Avail {
 			continue
 		}
-		if v.ID == id {
-			v.Avail = true
+		if b.ID == id {
+			b.Avail = false
 		}
 	}
 }
@@ -98,6 +100,10 @@ func calcWidth(books []Book, getString func(Book) string) (ret int) {
 		}
 	}
 	return
+}
+
+func ClearTerminal() {
+	fmt.Print("\033[H\033[2J")
 }
 
 func main() {
@@ -127,14 +133,12 @@ func main() {
 	var userInput string
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		// Start new frame - clear Terminal buffer
-		fmt.Print("\033[H\033[2J")
+		ClearTerminal()
 
 		PrintCurrentMode(userWants)
-		fmt.Println("DEBUG: userInput: ", userInput)
 		fmt.Println()
 
-		// Print book list
+		// Book list
 		fmt.Printf(tableRowFormat, "ID", "Автор", "Название", "Доступно")
 		for _, b := range books {
 			switch userWants {
@@ -143,7 +147,6 @@ func main() {
 					continue
 				}
 			case UserWantsConcreteAuthor:
-				fmt.Println("DEBUG: UserWantsConcreteAuthor")
 				if !strings.Contains(b.Author, userInput) {
 					continue
 				}
@@ -156,9 +159,19 @@ func main() {
 		}
 
 		// User input
-		fmt.Print("\nВведите запрос: ")
+		if userWants == UserWantsGetBook {
+			fmt.Print("\nВведите ID книги: ")
+		} else {
+			fmt.Print("\nВведите запрос: ")
+		}
 		if scanner.Scan() {
-			userInput := scanner.Text()
+			userInput = scanner.Text() // Fuck ":=". And it is not even a compiler warning!
+
+			if userWants == UserWantsGetBook {
+				FindAndGetAvailBookByID(books, scanner.Text())
+				userInput = "0" // fallback to help screen
+			}
+
 			switch userInput {
 			case "0":
 				userWants = UserWantsHelp
@@ -168,11 +181,10 @@ func main() {
 				userWants = UserWantsGetBook
 			case "3":
 				userWants = UserWantsConcreteAuthor
-			default:
-				if userWants == UserWantsGetBook {
-					FindAndGetAvailBookByID(books, userInput)
-				}
+			case "4":
+				ClearTerminal()
+				os.Exit(0)
 			}
 		}
-	}
+	} // main loop
 }
