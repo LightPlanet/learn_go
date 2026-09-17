@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"time"
+	"strings"
 )
 
 type Book struct {
@@ -54,7 +54,9 @@ func calcWidth(books []Book, getString func(Book) string) (ret int) {
 
 func main() {
 	books := []Book{
-		{"0", "D. Knuth", "The Art of computer programming", true},
+		{"0", "Donald Knuth", "The Art of Computer Programming", true},
+		{"1", "Steven Skiena ", "Algorithm Design Manual", true},
+		{"2", "Vladimir Arnold ", "A Mathematical Trivium", true},
 	}
 
 	// Calculate format string to align book entries
@@ -70,7 +72,17 @@ func main() {
 		return
 	}()
 
+	// State machine
+	const (
+		Help = iota // default
+		NotAvailBooks
+		GetBook
+		BooksOfAuthor
+	)
+	userWants := Help
+
 	// Main loop
+	var userInput string
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		// Start new frame - clear Terminal buffer
@@ -79,15 +91,36 @@ func main() {
 		// Print current state and help
 		fmt.Printf(tableRowFormat, "ID", "Author", "Title", "Avail")
 		for _, b := range books {
+			switch userWants {
+			case NotAvailBooks:
+				if b.Avail {
+					continue
+				}
+			case BooksOfAuthor:
+				if !strings.Contains(b.Author, userInput) {
+					continue
+				}
+			}
 			b.Print(tableRowFormat)
 		}
-		PrintHelp()
+		if userWants == Help {
+			fmt.Println("Available commands:")
+			PrintHelp()
+		}
 
+		// User input
 		if scanner.Scan() {
-			text := scanner.Text()
-			// Parse command
-			fmt.Println(text)
-			time.Sleep(1 * time.Second)
+			userInput := scanner.Text()
+			switch userInput {
+			case "0":
+				userWants = Help
+			case "1":
+				userWants = NotAvailBooks
+			case "2":
+				userWants = GetBook
+			case "3":
+				userWants = BooksOfAuthor
+			}
 		}
 	}
 }
