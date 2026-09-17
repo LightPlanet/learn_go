@@ -63,25 +63,13 @@ func PrintHelp() {
 	fmt.Println("3 - Книги автора")
 }
 
-//func FindBookInUse(books []Book) {
-//	for _, v := range books {
-//		if v.InUse == true {
-//			fmt.Println(v.ID, v.Author, v.Title, v.InUse)
+//	func FindBookInUse(books []Book) {
+//		for _, v := range books {
+//			if v.InUse == true {
+//				fmt.Println(v.ID, v.Author, v.Title, v.InUse)
+//			}
 //		}
 //	}
-//}
-//
-//func FindBookByIndex(books []Book, index string) {
-//	for _, v := range books {
-//		if v.InUse == true {
-//			continue
-//		}
-//		if v.ID == index {
-//			v.InUse = true
-//			fmt.Println(v.ID, v.Author, v.Title, v.InUse)
-//		}
-//	}
-//}
 //
 //func FindBook(books []Book, s string) {
 //	for _, v := range books {
@@ -90,6 +78,17 @@ func PrintHelp() {
 //		}
 //	}
 //}
+
+func FindAndGetAvailBookByID(books []Book, id string) {
+	for _, v := range books {
+		if !v.Avail == true {
+			continue
+		}
+		if v.ID == id {
+			v.Avail = true
+		}
+	}
+}
 
 func calcWidth(books []Book, getString func(Book) string) (ret int) {
 	for _, b := range books {
@@ -132,17 +131,19 @@ func main() {
 		fmt.Print("\033[H\033[2J")
 
 		PrintCurrentMode(userWants)
+		fmt.Println("DEBUG: userInput: ", userInput)
 		fmt.Println()
 
 		// Print book list
 		fmt.Printf(tableRowFormat, "ID", "Автор", "Название", "Доступно")
 		for _, b := range books {
 			switch userWants {
-			case UserWantsNotAvailBooks:
+			case UserWantsNotAvailBooks: // ok
 				if b.Avail {
 					continue
 				}
 			case UserWantsConcreteAuthor:
+				fmt.Println("DEBUG: UserWantsConcreteAuthor")
 				if !strings.Contains(b.Author, userInput) {
 					continue
 				}
@@ -167,6 +168,10 @@ func main() {
 				userWants = UserWantsGetBook
 			case "3":
 				userWants = UserWantsConcreteAuthor
+			default:
+				if userWants == UserWantsGetBook {
+					FindAndGetAvailBookByID(books, userInput)
+				}
 			}
 		}
 	}
