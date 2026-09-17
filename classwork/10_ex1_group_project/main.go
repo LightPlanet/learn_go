@@ -42,7 +42,7 @@ func FindBook(books []Book, s string) {
 
 }
 
-func findLongestString(books []Book, getString func(Book) string) (ret int) {
+func calcWidth(books []Book, getString func(Book) string) (ret int) {
 	for _, b := range books {
 		l := len(getString(b))
 		if l > ret {
@@ -57,14 +57,15 @@ func main() {
 		{"0", "D. Knuth", "The Art of computer programming", true},
 	}
 
-	//tableRowFormat := "%-5v%-30v%-40v%-5v\n"
+	// Calculate format string to align book entries
+	// Example: "%-5v%-30v%-40v%-5v\n"
 	tableRowFormat := func() (f string) {
 		f += "%-"
-		f += strconv.Itoa(4 + findLongestString(books, func(b Book) string { return b.ID }))
+		f += strconv.Itoa(4 + calcWidth(books, func(b Book) string { return b.ID }))
 		f += "v%-"
-		f += strconv.Itoa(4 + findLongestString(books, func(b Book) string { return b.Author }))
+		f += strconv.Itoa(4 + calcWidth(books, func(b Book) string { return b.Author }))
 		f += "v%-"
-		f += strconv.Itoa(4 + findLongestString(books, func(b Book) string { return b.Title }))
+		f += strconv.Itoa(4 + calcWidth(books, func(b Book) string { return b.Title }))
 		f += "v%-5v\n" // "Avail", "true", "false"
 		return
 	}()
