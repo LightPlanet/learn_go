@@ -7,7 +7,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "console": "integratedTerminal"   // ← must be HERE, inside the config
+            "console": "integratedTerminal"
         }
     ]
 }

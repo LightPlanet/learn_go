@@ -165,7 +165,7 @@ func main() {
 			fmt.Print("\nВведите запрос: ")
 		}
 		if scanner.Scan() {
-			userInput = scanner.Text() // Fuck ":=". And it is not even a compiler warning!
+			userInput = scanner.Text() // F*ck ":=". And it is not even a compiler warning!
 
 			if userWants == UserWantsGetBook {
 				FindAndGetAvailBookByID(books, scanner.Text())
