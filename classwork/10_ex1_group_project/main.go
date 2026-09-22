@@ -1,6 +1,6 @@
 // На ЯП написать консольное приложение по такому ТЗ:
 // Пишем консольное приложение для Библиотекарей
-// {
+// type Book struct {
 //     Id
 //     Author
 //     Title
@@ -23,18 +23,7 @@ import (
 	"strings"
 )
 
-type Book struct {
-	ID     string
-	Author string
-	Title  string
-	Avail  bool
-}
-
-func (this Book) Print(rowFormat string) {
-	fmt.Printf(rowFormat, this.ID, this.Author, this.Title, this.Avail)
-}
-
-// Program state (see main.userWants variable)
+// Program state (see Context.UserWants variable)
 const (
 	UserWantsHelp = iota // default
 	UserWantsNotAvailBooks
@@ -42,13 +31,15 @@ const (
 	UserWantsConcreteAuthor
 )
 
+// Interface helpers --------------------------------------------------------------------
+
 func PrintCurrentMode(userWants int) {
 	fmt.Print("Текущий режим: ")
 	switch userWants {
 	case UserWantsHelp:
 		fmt.Println("Помощь")
 	case UserWantsNotAvailBooks:
-		fmt.Println("Не доступные книги")
+		fmt.Println("Недоступные книги")
 	case UserWantsGetBook:
 		fmt.Println("Запрос книги")
 	case UserWantsConcreteAuthor:
@@ -59,40 +50,38 @@ func PrintCurrentMode(userWants int) {
 func PrintHelp() {
 	fmt.Println("0 - Помощь (этот список)")
 	fmt.Println("1 - Все книги, которые были взяты")
-	fmt.Println("2 - Взять книгу по индексу")
-	fmt.Println("3 - Книги автора")
+	fmt.Println("2 - Взять книгу по ID")
+	fmt.Println("3 - Поиск по автору")
 	fmt.Println("4 - Закрыть программу")
 }
 
-//	func FindBookInUse(books []Book) {
-//		for _, v := range books {
-//			if v.InUse == true {
-//				fmt.Println(v.ID, v.Author, v.Title, v.InUse)
-//			}
-//		}
-//	}
-//
-//func FindBook(books []Book, s string) {
-//	for _, v := range books {
-//		if v.Author == s {
-//			fmt.Println(v.ID, v.Author, v.Title, v.InUse)
-//		}
-//	}
-//}
+func ClearTerminal() {
+	fmt.Print("\033[H\033[2J")
+}
+
+// Context helpers ----------------------------------------------------------------------
+
+type Book struct {
+	ID     string
+	Author string
+	Title  string
+	Avail  bool
+}
+
+func (this Book) Print(format string) {
+	fmt.Printf(format, this.ID, this.Author, this.Title, this.Avail)
+}
 
 func FindAndGetAvailBookByID(books []Book, id string) {
-	for i := 0; i < len(books); i++ {
+	for i := range books {
 		b := &books[i]
-		if !b.Avail {
-			continue
-		}
-		if b.ID == id {
+		if b.Avail && b.ID == id {
 			b.Avail = false
 		}
 	}
 }
 
-func calcWidth(books []Book, getString func(Book) string) (ret int) {
+func CalcWidth(books []Book, getString func(Book) string) (ret int) {
 	for _, b := range books {
 		l := len(getString(b))
 		if l > ret {
@@ -102,89 +91,115 @@ func calcWidth(books []Book, getString func(Book) string) (ret int) {
 	return
 }
 
-func ClearTerminal() {
-	fmt.Print("\033[H\033[2J")
+// Program context ----------------------------------------------------------------------
+
+type Context struct {
+	Books     []Book
+	UserInput string
+	UserWants int
+	RowFormat string
+}
+
+func MakeContext(books []Book) *Context {
+	ret := &Context{}
+	ret.Books = books
+
+	// Calculate format string to align book entries
+	ret.RowFormat = func() (f string) {
+		f += "%-"
+		f += strconv.Itoa(4 + CalcWidth(books, func(b Book) string { return b.ID }))
+		f += "v%-"
+		f += strconv.Itoa(4 + CalcWidth(books, func(b Book) string { return b.Author }))
+		f += "v%-"
+		f += strconv.Itoa(4 + CalcWidth(books, func(b Book) string { return b.Title }))
+		f += "v%-5v\n" // "Доступно", "true", "false"
+		return
+	}()
+	return ret
+}
+
+func (this *Context) ParseUserInput(scanner *bufio.Scanner) {
+	if !scanner.Scan() {
+		return
+	}
+	this.UserInput = scanner.Text()
+
+	if this.UserWants == UserWantsGetBook {
+		FindAndGetAvailBookByID(this.Books, scanner.Text())
+		this.UserInput = "0" // fallback to help screen
+	}
+
+	switch this.UserInput {
+	case "0":
+		this.UserWants = UserWantsHelp
+	case "1":
+		this.UserWants = UserWantsNotAvailBooks
+	case "2":
+		this.UserWants = UserWantsGetBook
+	case "3":
+		this.UserWants = UserWantsConcreteAuthor
+	case "4":
+		ClearTerminal()
+		os.Exit(0)
+	}
+}
+
+func (this *Context) ShowFrame() {
+	// Current mode
+	PrintCurrentMode(this.UserWants)
+	fmt.Println()
+
+	// Book list
+	fmt.Printf(this.RowFormat, "ID", "Автор", "Название", "Доступно")
+	for _, b := range this.Books {
+		switch this.UserWants {
+		case UserWantsNotAvailBooks:
+			if b.Avail {
+				continue
+			}
+		case UserWantsConcreteAuthor:
+			if !strings.Contains(b.Author, this.UserInput) {
+				continue
+			}
+		}
+		b.Print(this.RowFormat)
+	}
+
+	// Help
+	if this.UserWants == UserWantsHelp {
+		fmt.Println("\nДоступные команды:")
+		PrintHelp()
+	}
+
+	// User input
+	switch this.UserWants {
+	case UserWantsGetBook:
+		fmt.Print("\nВведите ID книги: ")
+	case UserWantsConcreteAuthor:
+		fmt.Print("\nВведите имя автора: ")
+	default:
+		fmt.Print("\nВведите запрос: ")
+	}
 }
 
 func main() {
-	books := []Book{
+	ctx := MakeContext([]Book{
 		{"0", "Donald Knuth", "The Art of Computer Programming", true},
-		{"1", "Steven Skiena ", "Algorithm Design Manual", true},
-		{"2", "Vladimir Arnold ", "A Mathematical Trivium", true},
-	}
-
-	// Calculate format string to align book entries
-	// Example: "%-5v%-30v%-40v%-5v\n"
-	tableRowFormat := func() (f string) {
-		f += "%-"
-		f += strconv.Itoa(4 + calcWidth(books, func(b Book) string { return b.ID }))
-		f += "v%-"
-		f += strconv.Itoa(4 + calcWidth(books, func(b Book) string { return b.Author }))
-		f += "v%-"
-		f += strconv.Itoa(4 + calcWidth(books, func(b Book) string { return b.Title }))
-		f += "v%-5v\n" // "Avail", "true", "false"
-		return
-	}()
-
-	// State machine
-	userWants := UserWantsHelp
+		{"1", "Steven Skiena", "Algorithm Design Manual", true},
+		{"2", "Vladimir Arnold", "A Mathematical Trivium", true},
+	})
 
 	// Main loop
-	var userInput string
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		ClearTerminal()
+		ctx.ShowFrame()
+		ctx.ParseUserInput(scanner)
 
-		PrintCurrentMode(userWants)
-		fmt.Println()
-
-		// Book list
-		fmt.Printf(tableRowFormat, "ID", "Автор", "Название", "Доступно")
-		for _, b := range books {
-			switch userWants {
-			case UserWantsNotAvailBooks: // ok
-				if b.Avail {
-					continue
-				}
-			case UserWantsConcreteAuthor:
-				if !strings.Contains(b.Author, userInput) {
-					continue
-				}
-			}
-			b.Print(tableRowFormat)
+		err := scanner.Err()
+		if err != nil {
+			fmt.Println(err)
+			// Make new scanner?
 		}
-		if userWants == UserWantsHelp {
-			fmt.Println("\nДоступные команды:")
-			PrintHelp()
-		}
-
-		// User input
-		if userWants == UserWantsGetBook {
-			fmt.Print("\nВведите ID книги: ")
-		} else {
-			fmt.Print("\nВведите запрос: ")
-		}
-		if scanner.Scan() {
-			userInput = scanner.Text() // F*ck ":=". And it is not even a compiler warning!
-
-			if userWants == UserWantsGetBook {
-				FindAndGetAvailBookByID(books, scanner.Text())
-				userInput = "0" // fallback to help screen
-			}
-
-			switch userInput {
-			case "0":
-				userWants = UserWantsHelp
-			case "1":
-				userWants = UserWantsNotAvailBooks
-			case "2":
-				userWants = UserWantsGetBook
-			case "3":
-				userWants = UserWantsConcreteAuthor
-			case "4":
-				ClearTerminal()
-				os.Exit(0)
-			}
-		}
-	} // main loop
+	}
 }
