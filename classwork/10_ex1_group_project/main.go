@@ -105,8 +105,9 @@ func MakeContext(books []Book) *Context {
 	ret.Books = books
 
 	// Calculate format string to align book entries
+	// "%-10s" "test      "
 	ret.RowFormat = func() (f string) {
-		f += "%-"
+		f += "-%"
 		f += strconv.Itoa(4 + CalcWidth(books, func(b Book) string { return b.ID }))
 		f += "v%-"
 		f += strconv.Itoa(4 + CalcWidth(books, func(b Book) string { return b.Author }))
