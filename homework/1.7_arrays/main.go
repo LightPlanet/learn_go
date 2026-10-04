@@ -23,7 +23,9 @@ import (
 	"fmt"
 	"iter"
 	"maps"
+	"math/rand"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -40,6 +42,92 @@ func calcWidth(entries iter.Seq[string]) (width int) {
 	return
 }
 
+// Exercise 1 ---------------------------------------------------------------------------
+
+func Ex1() {
+	// Fill
+	myArray := [10]int{}
+	for i := 0; i < len(myArray); i++ {
+		myArray[i] = rand.Intn(100)
+	}
+	fmt.Println("Generated pseudo-random array:", myArray)
+
+	// Note:
+	// 1. 	mySlice := MyArray[:] 					// Not a copy - makes a view
+	// 2. 	mySlice := make([]int, len(myArray))	// Alternative
+	// 		copy(mySlice, myArray[:])
+
+	// Copy
+	mySlice := slices.Clone(myArray[:])
+	fmt.Println("Copied to slice:              ", mySlice)
+
+	// Sort (lexicographic order by default)
+	slices.Sort(mySlice)
+	fmt.Println("Sorted slice:                 ", mySlice)
+}
+
+// Exercise 2 ---------------------------------------------------------------------------
+
+const CityNotFound = -1
+
+// Returns the index of the city if found, "CityNotFound" constant otherwise
+func FindCity(cities []string, name string) int {
+	for i, v := range cities {
+		if v == name {
+			return i
+		}
+	}
+	return CityNotFound
+}
+
+func AddCity(cities *[]string, name string) bool {
+	if FindCity(*cities, name) == CityNotFound {
+		*cities = append(*cities, name)
+		return true
+	}
+	return false
+}
+
+func RemoveCity(cities *[]string, name string) bool {
+	where := FindCity(*cities, name)
+	if where != CityNotFound {
+		*cities = slices.Delete(*cities, where, where+1)
+		return true
+	}
+	return false
+}
+
+func Ex2() {
+	cities := []string{
+		"Moscow",
+		"Novosibirsk",
+		"Tambov",
+		"Sochi",
+		"Ryazan",
+		"Tula",
+	}
+	fmt.Println("Cities:      ", cities)
+
+	// Add
+	newCity := "Voronezh"
+	if AddCity(&cities, newCity) {
+		fmt.Println("Added city:  ", cities)
+	}
+
+	// Find
+	index := FindCity(cities, newCity)
+	if index != CityNotFound {
+		fmt.Printf("Found city:    %s at: %d\n", cities[index], index)
+	}
+
+	// Remove
+	if RemoveCity(&cities, newCity) {
+		fmt.Println("Removed city:", cities)
+	}
+}
+
+// Exercise 3 ---------------------------------------------------------------------------
+
 func Ex3() {
 	calcWords := func(s string) map[string]int {
 		ret := make(map[string]int)
@@ -50,6 +138,7 @@ func Ex3() {
 		return ret
 	}
 
+	fmt.Print("Enter the sentence: ")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		text := scanner.Text()
@@ -66,5 +155,10 @@ func Ex3() {
 }
 
 func main() {
+	fmt.Println("Exercise 1")
+	Ex1()
+	fmt.Println("\nExercise 2")
+	Ex2()
+	fmt.Println("\nExercise 3")
 	Ex3()
 }
