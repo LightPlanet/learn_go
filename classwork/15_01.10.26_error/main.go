@@ -64,33 +64,6 @@ func findErr(err error) {
 	}
 }
 
-//func ErrorsExample() {
-//	err := f1()
-//	if err != nil {
-//		findErr(err)
-//	}
-//	fmt.Printf("In function: %s\n", result)
-//}
-//
-//type MyError struct {
-//    Code int
-//    Msg  string
-//}
-//
-//func (e *MyError) Error() string { return e.Msg }
-//
-//func doWork() error {
-//    return fmt.Errorf("wrap: %w", &MyError{Code: 404, Msg: "not found"})
-//}
-//
-//func main() {
-//    err := doWork()
-//    var myErr *MyError
-//    if errors.As(err, &myErr) {
-//        fmt.Println("Code:", myErr.Code) // Code: 404
-//    }
-//}
-
 // Composition --------------------------------------------------------------------------
 
 // A single operation of the Pipe[T]
