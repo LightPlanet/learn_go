@@ -26,6 +26,7 @@ func (e *MyError) Error() string {
 func f1() error {
 	err := f2()
 	if err != nil {
+		// "%w" is used to wrap an error
 		return &MyError{Func: "f1", Err: fmt.Errorf("%w:%w", ErrorInF1, err)}
 	}
 	return nil
@@ -95,6 +96,7 @@ func findErr(err error) {
 // A single operation of the Pipe[T]
 type PipeFn[T any] func(T) (T, error)
 
+// Deduces pipe data type and begins a pipe
 func Pipe[T any](value T) func(fns ...PipeFn[T]) (T, error) {
 	return func(fns ...PipeFn[T]) (T, error) {
 		var err error
@@ -108,6 +110,7 @@ func Pipe[T any](value T) func(fns ...PipeFn[T]) (T, error) {
 	}
 }
 
+// Example modifier for Pipe[string]
 func AddBrackets(left, right rune) PipeFn[string] {
 	return func(s string) (string, error) {
 		return (string(left) + s + string(right)), nil
