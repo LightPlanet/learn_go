@@ -96,7 +96,7 @@ func PipeExample() {
 		AddBrackets('(', ')'),
 		AddBrackets('{', '}'),
 	)
-	if err != nil {
+	if err != nil { // No need for "if ... if ... if ..." statement
 		fmt.Println(err)
 		return
 	}
