@@ -17,17 +17,23 @@ type Book struct {
 }
 
 var Books = []Book{
-	{"1", "Толкин", "Властелин колец", true},
-	{"2", "Достоевский", "Преступление и наказание", true},
-	{"3", "Толкин", "Хоббит", true},
-	{"4", "Достоевский", "Идиот", true},
-	{"5", "Солженицын", "Архипелаг ГУЛАГ", true},
+	{"1", "Кнут", "Искусство программирования", true},
+	{"2", "Кнут Грэхем Паташник", "Конкретная математика", true},
+	{"3", "Стивен Скиена", "Алгоритмы. Руководство по разработке", true},
+	{"4", "Стивен Скиена", "Наука о данных", true},
+	{"5", "Владимир Арнольд", "Математичесий тривиум", true},
+	{"6", "Владимир Арнольд", "Математические методы классической механики", true},
+	{"7", "Валенитина Морозова", "Введение в анализ", true},
+	{"8", "Елена Власова", "Ряды", true},
+	{"9", "Виноградов", "Основы теории чисел", true},
+	{"10", "Сосинский", "Введение в топологию", true},
+	{"11", "Успенский", "Простейшие примеры математических доказательств", true},
 }
 
-func FilterBooks(filter, query string) (ret []Book) {
+func FilterBooks(filter, author string) (ret []Book) {
 	for _, b := range Books {
 		// Case insesitive compare is better for the UX
-		if query != "" && !strings.Contains(strings.ToLower(b.Author), strings.ToLower(query)) {
+		if author != "" && !strings.Contains(strings.ToLower(b.Author), strings.ToLower(author)) {
 			continue
 		}
 		switch filter {
@@ -57,22 +63,26 @@ func TakeBookByID(id string) { // -> bool ?
 // Handlers -----------------------------------------------------------------------------
 
 func BookListHadler(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query().Get("author")
+	author := r.URL.Query().Get("author")
 	filter := r.URL.Query().Get("filter")
 
-	wantedBooks := FilterBooks(filter, query)
+	wantedBooks := FilterBooks(filter, author)
 
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("tmpl.ParseFiles:", err)
 		return
 	}
 	// Map of any - because contains different types
-	tmpl.Execute(w, map[string]any{
+	err = tmpl.Execute(w, map[string]any{
 		"Books":  wantedBooks,
-		"Query":  query,
+		"Author": author,
 		"Filter": filter,
 	})
+	if err != nil {
+		log.Println("tmpl.Execute:", err)
+	}
 }
 
 func TakeBookHandler(w http.ResponseWriter, r *http.Request) {

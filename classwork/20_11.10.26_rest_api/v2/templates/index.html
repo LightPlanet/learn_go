@@ -1,4 +1,3 @@
-{{define "index.html"}}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -12,7 +11,7 @@
             min-height: 100vh;
         }
         body {
-            background-image: url('../static/bg.webp'); /* Web is on /book-list/ */
+            background-image: url('../static/bg.webp'); /* index is /book-list/ */
             background-size: cover;                     /* Scales image to fill screen */
             background-position: center;                /* Centers the image */
             background-repeat: no-repeat;               /* Prevents tiling */
@@ -46,16 +45,16 @@
 <body>
     <h1 style="text-align:center; color: aliceblue;">Библитекарь</h1>
 
-    <form class="search" method="get" action="/">
-        <input type="text" name="author" value="{{.Query}}" placeholder="Поиск по автору...">
+    <form class="search" method="get" action="/book-list/">
+        <input type="text" name="author" value="{{.Author}}" placeholder="Поиск по автору...">
         <input type="hidden" name="filter" value="{{.Filter}}">
-        <button type="submit">Найти</button>
+        <button type="submit">Найти автора</button>
     </form>
 
     <div class="filters">
-        <a href="/book-list/?q={{.Query}}&filter=all">Все</a>
-        <a href="/book-list/?q={{.Query}}&filter=avail">В наличии</a>
-        <a href="/book-list/?q={{.Query}}&filter=not_avail">Взятые</a>
+        <a href="/book-list/?author={{.Author}}&filter=all">Все</a>
+        <a href="/book-list/?author={{.Author}}&filter=avail">В наличии</a>
+        <a href="/book-list/?author={{.Author}}&filter=not_avail">Взятые</a>
     </div>
 
     <table>
@@ -90,4 +89,3 @@
     </table>
 </body>
 </html>
-{{end}}
