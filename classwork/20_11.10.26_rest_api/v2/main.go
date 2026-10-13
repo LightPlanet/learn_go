@@ -1,3 +1,12 @@
+// На ЯП написать консольное приложение по такому ТЗ:
+// Пишем консольное приложение для Библиотекарей
+// Изначально в библиотеке уже есть несколько книг.
+// Комады, доступные для набора:
+// 0) вывести помощь
+// 1) Вывести все книги, которые были взяты
+// 2) Взять книгу по ее индексу (нельзя брать уже взятые книги)
+// 3) Вывести все книги по автору (вообще все)
+
 package main
 
 import (
@@ -89,7 +98,7 @@ func TakeBookHandler(w http.ResponseWriter, r *http.Request) {
 	bookID := r.FormValue("id")
 	TakeBookByID(bookID)
 
-	// Go back to main
+	// Go back to main (StatusSeeOther = 303 - redirection code)
 	http.Redirect(w, r, "/book-list/", http.StatusSeeOther)
 }
 
