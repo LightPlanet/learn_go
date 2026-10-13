@@ -1,0 +1,93 @@
+{{define "index.html"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Библиотекарь</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+        body {
+            background-image: url('../static/bg.webp'); /* Web is on /book-list/ */
+            background-size: cover;                     /* Scales image to fill screen */
+            background-position: center;                /* Centers the image */
+            background-repeat: no-repeat;               /* Prevents tiling */
+            background-attachment: fixed;               /* Keeps image stationary on scroll */
+        }
+        table {
+            border-collapse: collapse;
+            width: 90%;
+            margin: 20px auto;
+            background: #2d2d2d;
+            color: aliceblue;
+        }
+        th { background: #3a3a3a; }
+        th, td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: left;
+        }
+        td.avail     {color: green;}
+        td.not_avail {color: red;}
+        input, button {
+            background: #2d2d2d;
+            color: aliceblue;
+            border: 1px solid #444;
+        }
+        .search { margin: 20px auto; width: 90%; }
+        .filters { margin: 10px auto; width: 90%; }
+        .filters a { margin-right: 12px; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center; color: aliceblue;">Библитекарь</h1>
+
+    <form class="search" method="get" action="/">
+        <input type="text" name="author" value="{{.Query}}" placeholder="Поиск по автору...">
+        <input type="hidden" name="filter" value="{{.Filter}}">
+        <button type="submit">Найти</button>
+    </form>
+
+    <div class="filters">
+        <a href="/book-list/?q={{.Query}}&filter=all">Все</a>
+        <a href="/book-list/?q={{.Query}}&filter=avail">В наличии</a>
+        <a href="/book-list/?q={{.Query}}&filter=not_avail">Взятые</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Автор</th>
+                <th>Название</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Books}}
+            <tr>
+                <td>{{.Author}}</td>
+                <td>{{.Label}}</td>
+                <td class="{{if .Avail}}avail{{else}}not_avail{{end}}">
+                    {{if .Avail}}
+                        В наличии
+                        <form method="post" action="/take-book" style="display:inline">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <button type="submit">Взять</button>
+                        </form>
+                    {{else}}
+                        Взята
+                    {{end}}
+                </td>
+            </tr>
+            {{else}}
+            <tr><td colspan="3">Ничего не найдено</td></tr>
+            {{end}}
+        </tbody>
+    </table>
+</body>
+</html>
+{{end}}
