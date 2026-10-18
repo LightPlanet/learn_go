@@ -1,15 +1,14 @@
 package main_test
 
-import(
+import (
 	"testing"
-	"unitest"
+	main "unitest"
 )
 
 func TestIsEven(t *testing.T) {
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		value int
+		name  string // description of this test case
+		value int    // Named input parameters for target function.
 		want  string
 	}{
 		// TODO: Add test cases.
