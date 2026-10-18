@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func booksHandler(w http.ResponseWriter, r *http.Request) {
 	type User struct {
 		Name  string
 		Email string
@@ -23,7 +23,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/index.html")
+	tmpl, err := template.ParseFiles("templates/books.html")
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,7 +49,7 @@ func contactsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/", booksHandler)
 	http.HandleFunc("/about", aboutHandler)
 	http.HandleFunc("/contacts", contactsHandler)
 	log.Println("Server starting...")

@@ -29,7 +29,7 @@ import (
 	"net/http"
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func booksHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +46,7 @@ func onePhoneHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var mux = http.NewServeMux()
-	mux.HandleFunc("/", indexHandler)
+	mux.HandleFunc("/", booksHandler)
 	mux.HandleFunc("/about", aboutHandler)
 	mux.HandleFunc("/contacts", contactsHandler)
 	mux.HandleFunc("/api/phones", allPhonesHandler)

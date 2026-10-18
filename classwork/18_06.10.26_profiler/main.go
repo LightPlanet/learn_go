@@ -47,9 +47,9 @@ var httpTotalRequest = prometheus.NewCounterVec(
 	[]string{"path"},
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func booksHandler(w http.ResponseWriter, r *http.Request) {
 	httpTotalRequest.WithLabelValues(r.URL.Path).Inc()
-	fmt.Fprintf(w, "INDEX PAGE")
+	fmt.Fprintf(w, "books PAGE")
 }
 
 func PrometheusExample() {
@@ -57,7 +57,7 @@ func PrometheusExample() {
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/", booksHandler)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Println(err)
 		return
