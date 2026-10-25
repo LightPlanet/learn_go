@@ -45,21 +45,20 @@ func connectDB() (db *sql.DB) {
 	var count int
 	if err = db.QueryRow(`SELECT COUNT(*) FROM Book`).Scan(&count); err != nil {
 		log.Println(err)
-		return
+		return nil
 	}
 	if count == 0 {
-		if count == 0 {
-			for _, book := range Books {
-				_, err = db.Exec(
-					`INSERT INTO Book(ID, Author, Label, Avail) VALUES(?, ?, ?, ?)`,
-					book.ID, book.Author, book.Label, book.Avail,
-				)
+		for _, book := range Books {
+			_, err = db.Exec(
+				`INSERT INTO Book(ID, Author, Label, Avail) VALUES(?, ?, ?, ?)`,
+				book.ID, book.Author, book.Label, book.Avail,
+			)
+			if err != nil {
+				log.Println(err)
+				return nil
 			}
 		}
 	}
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	return
+	return db
 }
+
