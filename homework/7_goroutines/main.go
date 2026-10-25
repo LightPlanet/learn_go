@@ -45,7 +45,7 @@ func Ex1() {
 //     Горутина-генератор должна отправлять числа и закрывать канал после этого.
 //     Горутина-потребитель должна читать из канала и выводить числа, пока канал не закрыт.
 
-// WARNING: closes the chnnel after generation is finished
+// WARNING: closes the channel after generation is finished
 func GenerateTo(init int, count int, output *chan int) {
 	for i := range count {
 		*output <- init + i
