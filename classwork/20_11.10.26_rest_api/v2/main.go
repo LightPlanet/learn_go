@@ -30,11 +30,11 @@ type Book struct {
 	Avail  bool
 }
 
-// Is called by GetBooksFiltered() & GetBookByID()
+// Is called by GetBooksFiltered() & GetBookByID().
 // Do fresh SELECT because in theory Database can be changed by other client?
 // Hovewer, current implementation does not support real time update :D
 func DbSelectBooks() (books []Book) {
-	rows, err := Database.Query(`SELECT * FROM 'Books'`)
+	rows, err := Database.Query(`SELECT * FROM 'Books';`)
 	if err != nil {
 		log.Println("SELECT failed:", err)
 		return
@@ -42,9 +42,10 @@ func DbSelectBooks() (books []Book) {
 	defer rows.Close()
 
 	books = []Book{}
+	var avail int // Workaround: SQLite does not have a bool
 	for rows.Next() {
-		new_book := Book{}
-		err := rows.Scan(&new_book.ID, &new_book.Author, &new_book.Label, &new_book.Avail)
+		b := Book{}
+		err := rows.Scan(&b.ID, &b.Author, &b.Label, &avail)
 		if err != nil {
 			log.Println("rows.Scan failed:", err)
 			continue
@@ -53,7 +54,8 @@ func DbSelectBooks() (books []Book) {
 			log.Println("rows.Err failed:", err)
 			continue
 		}
-		books = append(books, new_book)
+		b.Avail = (avail == 1)
+		books = append(books, b)
 	}
 	return
 }
@@ -85,12 +87,11 @@ func TakeBookByID(id string) { // -> bool ?
 	for i := range books {
 		b := &books[i]
 		if b.Avail && b.ID == id {
-			b.Avail = false
 			_, err := Database.Exec(`
-				INSERT INTO phones (Vendor, Model, Price) 
-				VALUES (?, ?, ?)`, "Huawey", "Simple 1", 1000)
+				UPDATE Books SET Avail = 0
+				WHERE ID = (?);`, b.ID)
 			if err != nil {
-				log.Println("INSERT failed:", err)
+				log.Println("UPDATE failed:", err)
 				return
 			}
 		}
