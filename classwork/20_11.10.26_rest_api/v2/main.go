@@ -10,13 +10,18 @@
 package main
 
 import (
+	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
+
+	_ "modernc.org/sqlite"
 )
 
 // Database -----------------------------------------------------------------------------
+
+var Database *sql.DB
 
 type Book struct {
 	ID     string
@@ -25,22 +30,37 @@ type Book struct {
 	Avail  bool
 }
 
-var Books = []Book{
-	{"1", "Кнут", "Искусство программирования", true},
-	{"2", "Кнут Грэхем Паташник", "Конкретная математика", true},
-	{"3", "Стивен Скиена", "Алгоритмы. Руководство по разработке", true},
-	{"4", "Стивен Скиена", "Наука о данных", true},
-	{"5", "Владимир Арнольд", "Математичесий тривиум", true},
-	{"6", "Владимир Арнольд", "Математические методы классической механики", true},
-	{"7", "Валенитина Морозова", "Введение в анализ", true},
-	{"8", "Елена Власова", "Ряды", true},
-	{"9", "Виноградов", "Основы теории чисел", true},
-	{"10", "Сосинский", "Введение в топологию", true},
-	{"11", "Успенский", "Простейшие примеры математических доказательств", true},
+// Is called by GetBooksFiltered() & GetBookByID()
+// Do fresh SELECT because in theory Database can be changed by other client?
+// Hovewer, current implementation does not support real time update :D
+func DbSelectBooks() (books []Book) {
+	rows, err := Database.Query(`SELECT * FROM 'Books'`)
+	if err != nil {
+		log.Println("SELECT failed:", err)
+		return
+	}
+	defer rows.Close()
+
+	books = []Book{}
+	for rows.Next() {
+		new_book := Book{}
+		err := rows.Scan(&new_book.ID, &new_book.Author, &new_book.Label, &new_book.Avail)
+		if err != nil {
+			log.Println("rows.Scan failed:", err)
+			continue
+		}
+		if err := rows.Err(); err != nil {
+			log.Println("rows.Err failed:", err)
+			continue
+		}
+		books = append(books, new_book)
+	}
+	return
 }
 
-func FilterBooks(filter, author string) (ret []Book) {
-	for _, b := range Books {
+func GetBooksFiltered(filter, author string) (filtered []Book) {
+	books := DbSelectBooks()
+	for _, b := range books {
 		// Case insesitive compare is better for the UX
 		if author != "" && !strings.Contains(strings.ToLower(b.Author), strings.ToLower(author)) {
 			continue
@@ -55,16 +75,24 @@ func FilterBooks(filter, author string) (ret []Book) {
 				continue
 			}
 		}
-		ret = append(ret, b)
+		filtered = append(filtered, b)
 	}
 	return
 }
 
 func TakeBookByID(id string) { // -> bool ?
-	for i := range Books {
-		b := &Books[i]
+	books := DbSelectBooks()
+	for i := range books {
+		b := &books[i]
 		if b.Avail && b.ID == id {
 			b.Avail = false
+			_, err := Database.Exec(`
+				INSERT INTO phones (Vendor, Model, Price) 
+				VALUES (?, ?, ?)`, "Huawey", "Simple 1", 1000)
+			if err != nil {
+				log.Println("INSERT failed:", err)
+				return
+			}
 		}
 	}
 }
@@ -75,7 +103,7 @@ func BookListHadler(w http.ResponseWriter, r *http.Request) {
 	author := r.URL.Query().Get("author")
 	filter := r.URL.Query().Get("filter")
 
-	wantedBooks := FilterBooks(filter, author)
+	wantedBooks := GetBooksFiltered(filter, author)
 
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
@@ -85,7 +113,7 @@ func BookListHadler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Map of any - because contains different types
 	err = tmpl.Execute(w, map[string]any{
-		"Books":  wantedBooks,
+		"books":  wantedBooks,
 		"Author": author,
 		"Filter": filter,
 	})
@@ -105,6 +133,16 @@ func TakeBookHandler(w http.ResponseWriter, r *http.Request) {
 // Startup ------------------------------------------------------------------------------
 
 func main() {
+	// Load database
+	var err error
+	Database, err = sql.Open("sqlite", "example_db")
+	if err != nil {
+		log.Println("sql.Open", err)
+		return
+	}
+	defer Database.Close()
+
+	// Setup server
 	http.HandleFunc("/book-list/", BookListHadler)
 	http.HandleFunc("/take-book", TakeBookHandler)
 
