@@ -34,14 +34,13 @@ type Book struct {
 // Do fresh SELECT because in theory Database can be changed by other client?
 // Hovewer, current implementation does not support real time update :D
 func DbSelectBooks() (books []Book) {
-	rows, err := Database.Query(`SELECT * FROM 'Books';`)
+	rows, err := Database.Query(`SELECT * FROM Books`)
 	if err != nil {
 		log.Println("SELECT failed:", err)
 		return
 	}
 	defer rows.Close()
 
-	books = []Book{}
 	var avail int // Workaround: SQLite does not have a bool
 	for rows.Next() {
 		b := Book{}
@@ -114,9 +113,9 @@ func BookListHadler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Map of any - because contains different types
 	err = tmpl.Execute(w, map[string]any{
-		"books":  wantedBooks,
-		"Author": author,
-		"Filter": filter,
+		"Books":   wantedBooks,
+		"AuthorQ": author,
+		"FilterQ": filter,
 	})
 	if err != nil {
 		log.Println("tmpl.Execute:", err)

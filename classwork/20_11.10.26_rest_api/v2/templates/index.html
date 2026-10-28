@@ -47,16 +47,16 @@
 
     <!-- Поиск по автору  -->
     <form class="search" method="get" action="/book-list/">
-        <input type="text" name="author" value="{{.Author}}" placeholder="Поиск по автору...">
-        <input type="hidden" name="filter" value="{{.Filter}}">
+        <input type="text" name="author" value="{{.AuthorQ}}" placeholder="Поиск по автору...">
+        <input type="hidden" name="filter" value="{{.FilterQ}}">
         <button type="submit">Найти автора</button>
     </form>
 
     <!-- Фильтры списка  -->
     <div class="filters">
-        <a href="/book-list/?author={{.Author}}&filter=all">Все</a>
-        <a href="/book-list/?author={{.Author}}&filter=avail">В наличии</a>
-        <a href="/book-list/?author={{.Author}}&filter=not_avail">Взятые</a>
+        <a href="/book-list/?author={{.AuthorQ}}&filter=all">Все</a>
+        <a href="/book-list/?author={{.AuthorQ}}&filter=avail">В наличии</a>
+        <a href="/book-list/?author={{.AuthorQ}}&filter=not_avail">Взятые</a>
     </div>
 
     <!-- Список книг  -->
