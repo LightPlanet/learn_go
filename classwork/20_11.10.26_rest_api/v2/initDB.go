@@ -20,14 +20,14 @@ var Books = []Book{
 	{"11", "Успенский", "Простейшие примеры математических доказательств", true},
 }
 
-func InitDB() (*sql.DB, error) {
+func DbInit() (*sql.DB, error) {
 	db, err := sql.Open("sqlite", "auth.db")
 	if err != nil {
 		return nil, err
 	}
 
 	_, err = db.Exec(`
-		Create Table IF NOT EXISTS Book(
+		Create Table IF NOT EXISTS Books(
 			ID integer primary key autoincrement,
 			Author text not null,
 			Label text not null,
@@ -39,13 +39,13 @@ func InitDB() (*sql.DB, error) {
 	}
 
 	var count int
-	if err = db.QueryRow(`SELECT COUNT(*) FROM Book`).Scan(&count); err != nil {
+	if err = db.QueryRow(`SELECT COUNT(*) FROM Books`).Scan(&count); err != nil {
 		return nil, err
 	}
 	if count == 0 {
 		for _, book := range Books {
 			_, err = db.Exec(
-				`INSERT INTO Book(ID, Author, Label, Avail) VALUES(?, ?, ?, ?)`,
+				`INSERT INTO Books(ID, Author, Label, Avail) VALUES(?, ?, ?, ?)`,
 				book.ID, book.Author, book.Label, book.Avail,
 			)
 			if err != nil {
