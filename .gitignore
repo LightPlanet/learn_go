@@ -1,4 +1,5 @@
 main
 .clangd
 *.out
+*.db
 /classwork/18_06.10.26_profiler/prometheus
