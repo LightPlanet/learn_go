@@ -136,9 +136,8 @@ func TakeBookHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Load database
 	var err error
-	Database, err = sql.Open("sqlite", "example_db")
-	if err != nil {
-		log.Println("sql.Open", err)
+	if Database, err = InitDB(); err != nil {
+		log.Println("InitDB failed with error:", err)
 		return
 	}
 	defer Database.Close()

@@ -2,17 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"log"
 
 	_ "modernc.org/sqlite"
 )
-
-type Book struct {
-	ID     string
-	Author string
-	Label  string
-	Avail  bool
-}
 
 var Books = []Book{
 	{"1", "Кнут", "Искусство программирования", true},
@@ -28,12 +20,12 @@ var Books = []Book{
 	{"11", "Успенский", "Простейшие примеры математических доказательств", true},
 }
 
-func connectDB() (db *sql.DB) {
+func InitDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite", "auth.db")
 	if err != nil {
-		log.Println(err)
-		return nil
+		return nil, err
 	}
+
 	_, err = db.Exec(`
 		Create Table IF NOT EXISTS Book(
 			ID integer primary key autoincrement,
@@ -41,11 +33,14 @@ func connectDB() (db *sql.DB) {
 			Label text not null,
 			Avail integer not null
 		);
-			`)
+	`)
+	if err != nil {
+		return nil, err
+	}
+
 	var count int
 	if err = db.QueryRow(`SELECT COUNT(*) FROM Book`).Scan(&count); err != nil {
-		log.Println(err)
-		return nil
+		return nil, err
 	}
 	if count == 0 {
 		for _, book := range Books {
@@ -54,11 +49,9 @@ func connectDB() (db *sql.DB) {
 				book.ID, book.Author, book.Label, book.Avail,
 			)
 			if err != nil {
-				log.Println(err)
-				return nil
+				return nil, err
 			}
 		}
 	}
-	return db
+	return db, nil
 }
-
