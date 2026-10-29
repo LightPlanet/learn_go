@@ -21,6 +21,7 @@ func main() {
 	client := user.NewAuthServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
 	authResp, err := client.CheckUserCredo(ctx, &user.AuthRequest{
 		Email:    "ivanov@example.com",
 		Password: "123",

@@ -45,6 +45,7 @@ func main() {
 		return
 	}
 	defer rows.Close()
+
 	phones := []Phone{}
 	for rows.Next() {
 		p := Phone{}
