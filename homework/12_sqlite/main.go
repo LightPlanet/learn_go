@@ -31,7 +31,7 @@ var ExampleTableContents = []User{
 	{Email: "ramil@example.com", Password: "666"},
 }
 
-// Creates and fills the table with 'ExampleTableContents'
+// Creates "users" table and fills it with 'ExampleTableContents'
 // NOTE: Just for homework case
 func TryCreateTable(db *sql.DB) error {
 	const fnName = "TryCreateTable"
@@ -52,7 +52,7 @@ func TryCreateTable(db *sql.DB) error {
 		return fmt.Errorf("%s: %w", fnName, err)
 	}
 	if count > 0 {
-		return nil // Table alredy exists
+		return nil // Table already exists
 	}
 
 	// Useful statement feature - similar to HTML template
