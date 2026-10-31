@@ -1,7 +1,7 @@
 package main
 
 // github.com/mattn/go-sqlite3
-// modernc.org/sqlite
+// go get modernc.org/sqlite
 
 import (
 	"database/sql"
