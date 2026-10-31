@@ -18,10 +18,6 @@ func Divide(a, b float64) (float64, error) {
 	return a / b, nil
 }
 
-func Ex1() {
-
-}
-
 // Задача 4 из темы 8 -------------------------------------------------------------------
 // Создайте функцию sumAll, которая принимает целые числа и возвращает их сумму.
 // Пример использования:
@@ -35,13 +31,5 @@ func SumAll(vals []int) (sum int) {
 	return
 }
 
-func Ex2() {
-
-}
-
 func main() {
-	fmt.Println("Ex1")
-	Ex1()
-	fmt.Println("\nEx2")
-	Ex2()
 }
