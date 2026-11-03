@@ -14,10 +14,10 @@ func TestDivide(t *testing.T) {
 		want    float64
 		wantErr bool
 	}{
-		{"ok", 1.0, 1.0, 1.0, false},
-		{"ok", 6.0, 2.0, 3.0, false},
-		{"err", 1.0, 0.0, 0, true},
-		{"err", 0.0, 0.0, 0, true},
+		{"x/x x != 0", 1.0, 1.0, 1.0, false},
+		{"x/y x,y != 0", 6.0, 2.0, 3.0, false},
+		{"x/0 x != 0", 1.0, 0.0, 0, true},
+		{"0/0", 0.0, 0.0, 0, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
